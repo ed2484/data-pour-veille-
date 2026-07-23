@@ -5,15 +5,19 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch:
 
+# TRÈS IMPORTANT : Cette ligne donne au robot le droit d'enregistrer les fichiers
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Mise à jour pour enlever le warning
 
       - name: Installer Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5 # Mise à jour pour enlever le warning
         with:
           python-version: '3.10'
 
