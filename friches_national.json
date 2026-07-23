@@ -1,45 +1,4 @@
 {
-  "generated_at": "2026-07-23T18:56:50.180716",
-  "communes": {
-    "Dunkerque": {
-      "score_max": 5,
-      "friches_count": 12,
-      "details": "Anciennes emprises portuaires / ICPE"
-    },
-    "Fos-sur-Mer": {
-      "score_max": 5,
-      "friches_count": 8,
-      "details": "Zone Industrialo-Portuaire (ZIP)"
-    },
-    "Montataire": {
-      "score_max": 4,
-      "friches_count": 4,
-      "details": "Ancien bassin sidérurgique"
-    },
-    "Le Havre": {
-      "score_max": 4,
-      "friches_count": 7,
-      "details": "Réserves portuaires Axe Seine"
-    },
-    "Saint-Priest": {
-      "score_max": 3,
-      "friches_count": 3,
-      "details": "Friches logistiques 1ère couronne"
-    },
-    "Chalon-sur-Saône": {
-      "score_max": 4,
-      "friches_count": 5,
-      "details": "Sites industriels vacants (Axe A6)"
-    },
-    "Vierzon": {
-      "score_max": 4,
-      "friches_count": 3,
-      "details": "Pôle logistique centre, friches mobilisables"
-    },
-    "Béziers": {
-      "score_max": 3,
-      "friches_count": 2,
-      "details": "ZAC en requalification"
-    }
-  }
+  "generated_at": "2026-07-23T19:27:50.639318",
+  "communes": {}
 }
