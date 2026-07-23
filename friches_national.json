@@ -1,4 +1,83 @@
 {
-  "generated_at": "2026-07-23T19:27:50.639318",
-  "communes": {}
+  "generated_at": "2026-07-23T19:47:26.631794",
+  "communes": {
+    "Dunkerque": {
+      "score_max": 5,
+      "friches_count": 3,
+      "sites": [
+        {
+          "nom": "Ancienne Raffinerie SRD",
+          "surface": "45.2",
+          "statut": "Projet de reconversion",
+          "type": "Friche Industrielle",
+          "resume": "Ancien site pétrochimique stratégique."
+        }
+      ]
+    },
+    "Le Havre": {
+      "score_max": 5,
+      "friches_count": 2,
+      "sites": [
+        {
+          "nom": "Site Usine Lafarge",
+          "surface": "28.5",
+          "statut": "En attente",
+          "type": "Friche Industrielle",
+          "resume": "Emprise majeure Axe Seine."
+        }
+      ]
+    },
+    "Toulouse": {
+      "score_max": 4,
+      "friches_count": 2,
+      "sites": [
+        {
+          "nom": "Ancien Centre d'Essais",
+          "surface": "15.0",
+          "statut": "En travaux",
+          "type": "Friche Aéronautique",
+          "resume": "Requalification urbaine."
+        }
+      ]
+    },
+    "Avignon": {
+      "score_max": 4,
+      "friches_count": 2,
+      "sites": [
+        {
+          "nom": "Emprise Ferroviaire Marchandises",
+          "surface": "10.5",
+          "statut": "Étude en cours",
+          "type": "Friche Ferroviaire",
+          "resume": "Potentiel logistique urbain."
+        }
+      ]
+    },
+    "Chalon-Sur-Saone": {
+      "score_max": 4,
+      "friches_count": 1,
+      "sites": [
+        {
+          "nom": "Ancien site Kodak",
+          "surface": "22.0",
+          "statut": "Disponible",
+          "type": "Friche Industrielle",
+          "resume": "Emprise le long de l'A6."
+        }
+      ]
+    },
+    "Vierzon": {
+      "score_max": 4,
+      "friches_count": 1,
+      "sites": [
+        {
+          "nom": "Plateforme Case",
+          "surface": "18.5",
+          "statut": "Projet en cours",
+          "type": "Friche Logistique",
+          "resume": "Hub logistique central."
+        }
+      ]
+    }
+  }
 }
