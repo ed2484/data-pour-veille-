@@ -20,105 +20,74 @@ if not csv_files:
 
 fichier_csv_reel = csv_files[0]
 
-# Ta liste complète de communes du maillage
-villes_maillage = [
-    "Avignon", "Gannat", "Yzeure", "Toulouse", "Montataire", "Port-Saint-Louis-Du-Rhone",
-    "Meung-Sur-Loire", "Tremblay-En-France", "Mauguio", "Muret", "Vemars", "Arsac",
-    "Saint-Vulbas", "Livron-Sur-Drome", "Chessy", "Thiers", "Le Havre", "Saint-Priest",
-    "Pertuis", "Grenoble", "Uchaud", "Lezoux", "Dunkerque", "Fos-Sur-Mer", "Valenciennes",
-    "Metz", "Mulhouse", "Strasbourg", "Bordeaux", "Nantes", "Douai", "Onnaing", "Billy-Berclau",
-    "Thionville", "Tremery", "Ottmarsheim", "Reims", "Genas", "Meyzieu", "Venissieux",
-    "Andresieux-Boutheon", "Sorgues", "Cavaillon", "Orange", "Blagnac", "Colomiers", "Nimes",
-    "Sandouville", "Orleans", "Angers", "Beauvais", "Lens", "Douvrin", "Henin-Beaumont",
-    "Saint-Omer", "Arras", "Compiegne", "Laon", "Soissons", "Saint-Quentin", "Saint-Avold",
-    "Forbach", "Woippy", "Sarreguemines", "Huningue", "Lauterbourg", "Troyes", "Saint-Dizier",
-    "Epinal", "Chaponnay", "Communay", "Annecy", "Montbonnot-Saint-Martin", "Chambery",
-    "Clermont-Ferrand", "Montlucon", "Montbeliard", "Bourg-En-Bresse", "Romans-Sur-Isere",
-    "Le Pontet", "Carpentras", "Miramas", "Istres", "Vitrolles", "Marignane", "Aix-En-Provence",
-    "Castres", "Albi", "Tarbes", "Beziers", "Narbonne", "Carcassonne", "Cherbourg-En-Cotentin",
-    "Caen", "Honfleur", "Penly", "Ormes", "Chateauroux", "Dreux", "Blois"
-]
-
 def normaliser(nom):
     if pd.isna(nom): return ""
     return unicodedata.normalize('NFKD', str(nom)).encode('ASCII', 'ignore').decode('utf-8').lower().replace('-', ' ').replace("'", " ").strip()
 
-cibles_norm = {normaliser(v): v for v in villes_maillage}
 friches_data = {"generated_at": datetime.now().isoformat(), "communes": {}}
 
 try:
-    # Lecture par morceaux pour avaler les 36000 lignes sans saturer la RAM de GitHub
-    chunk_size = 10000
-    chunks = []
-    
-    for chunk in pd.read_csv(fichier_csv_reel, sep=None, engine='python', low_memory=False, chunksize=chunk_size):
+    # Lecture par morceaux pour avaler le gros fichier sans planter
+    for chunk in pd.read_csv(fichier_csv_reel, sep=None, engine='python', low_memory=False, chunksize=10000):
         chunk.columns = [str(c).strip().lower() for c in chunk.columns]
         
-        col_commune = 'comm_nom' if 'comm_nom' in chunk.columns else next((c for c in chunk.columns if 'comm' in c), None)
-        if col_commune:
-            chunk['commune_norm'] = chunk[col_commune].apply(normaliser)
-            filtered_chunk = chunk[chunk['commune_norm'].isin(cibles_norm.keys())]
-            if not filtered_chunk.empty:
-                chunks.append(filtered_chunk)
+        col_commune = next((c for c in chunk.columns if c in ['comm_nom', 'commune', 'libcom', 'ville']), None)
+        col_nom = next((c for c in chunk.columns if c in ['site_nom', 'nom_site', 'nom_friche', 'nom']), None)
+        col_statut = next((c for c in chunk.columns if 'statut' in c or 'occupation' in c), None)
+        col_type = next((c for c in chunk.columns if 'type' in c or 'activite_libelle' in c), None)
+        col_surf = next((c for c in chunk.columns if 'surf' in c), None)
 
-    if chunks:
-        df_filtre = pd.concat(chunks, ignore_index=True)
-        
-        col_nom = 'site_nom' if 'site_nom' in df_filtre.columns else 'nom'
-        col_statut = 'site_statut' if 'site_statut' in df_filtre.columns else 'site_occupation'
-        col_type = 'activite_libelle' if 'activite_libelle' in df_filtre.columns else 'site_type'
-        col_surf = 'unite_fonciere_surface' if 'unite_fonciere_surface' in df_filtre.columns else 'bati_surface'
-
-        for commune_norm, group in df_filtre.groupby('commune_norm'):
-            vrai_nom = cibles_norm[commune_norm]
-            sites_list = []
-            
-            for _, row in group.iterrows():
-                n = str(row.get(col_nom, "Site sans nom"))
-                if pd.isna(n) or n.lower() == 'nan' or not n.strip():
-                    n = "Site à qualifier"
+        if col_commune and col_nom:
+            for _, row in chunk.iterrows():
+                commune_brute = row.get(col_commune)
+                if pd.isna(commune_brute): continue
                 
-                st = str(row.get(col_statut, "Non précisé"))
-                if pd.isna(st) or st.lower() == 'nan': st = "Non précisé"
+                vrai_nom_ville = str(commune_brute).strip().title()
+                nom_site = str(row.get(col_nom, "")).strip()
                 
-                ty = str(row.get(col_type, "Friche"))
-                if pd.isna(ty) or ty.lower() == 'nan': ty = "Friche"
+                if not nom_site or nom_site.lower() == 'nan': continue
                 
-                surf = "N/C"
+                statut = str(row.get(col_statut, "Non précisé"))
+                if pd.isna(statut) or statut.lower() == 'nan': statut = "Non précisé"
+                
+                type_friche = str(row.get(col_type, "Friche"))
+                if pd.isna(type_friche) or type_friche.lower() == 'nan': type_friche = "Friche"
+                
+                surface = "N/C"
                 try:
                     s_val = row.get(col_surf)
                     if pd.notna(s_val):
-                        surf = f"{float(s_val):.1f}"
+                        surface = f"{float(s_val):.1f}"
                 except:
                     pass
 
-                sites_list.append({
-                    "nom": n.strip(),
-                    "surface": surf,
-                    "statut": st.strip(),
-                    "type": ty.strip(),
-                    "resume": f"Statut : {st} | Type : {ty}"
-                })
+                if vrai_nom_ville not in friches_data["communes"]:
+                    friches_data["communes"][vrai_nom_ville] = {
+                        "score_max": 4,
+                        "friches_count": 0,
+                        "sites": []
+                    }
+                
+                # Évite les doublons stricts de sites pour une même ville
+                existing_names = [s["nom"] for s in friches_data["communes"][vrai_nom_ville]["sites"]]
+                if nom_site not in existing_names and len(existing_names) < 20:
+                    friches_data["communes"][vrai_nom_ville]["sites"].append({
+                        "nom": nom_site,
+                        "surface": surface,
+                        "statut": statut,
+                        "type": type_friche,
+                        "resume": f"Statut : {statut} | Type : {type_friche}"
+                    })
+                    friches_data["communes"][vrai_nom_ville]["friches_count"] += 1
 
-            score = 5 if len(sites_list) >= 5 else (4 if len(sites_list) >= 2 else 3)
-            friches_data["communes"][vrai_nom] = {
-                "score_max": score,
-                "friches_count": len(sites_list),
-                "sites": sites_list[:25] # On garde jusqu'à 25 vrais sites par ville
-            }
-
-    # Pour les villes du maillage qui n'ont pas de lignes dans le CSV brut
-    for norm_key, vrai_nom in cibles_norm.items():
-        if vrai_nom not in friches_data["communes"]:
-            friches_data["communes"][vrai_nom] = {
-                "score_max": 3,
-                "friches_count": 1,
-                "sites": [{"nom": "Secteur d'opportunité foncière", "surface": "N/C", "statut": "À l'étude", "type": "Friche potentielle", "resume": "Secteur identifié au maillage."}]
-            }
+    # Ajustement des scores selon le nombre de friches
+    for ville, data in friches_data["communes"].items():
+        cnt = data["friches_count"]
+        data["score_max"] = 5 if cnt >= 5 else (4 if cnt >= 2 else 3)
 
     with open('friches_national.json', 'w', encoding='utf-8') as f:
         json.dump(friches_data, f, ensure_ascii=False, indent=2)
-    print("Fichier JSON mis à jour avec les vraies données du Cerema.")
+    print("Fichier JSON généré avec succès depuis le CSV brut.")
 
 except Exception as e:
-    print(f"Erreur d'extraction : {e}")
+    print(f"Erreur : {e}")
